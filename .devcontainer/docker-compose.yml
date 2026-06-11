@@ -1,0 +1,89 @@
+name: poc-dev-container
+
+networks:
+    default:
+        name: poc-dev-network
+        driver: bridge
+
+services:
+    dev-container:
+        image: poc-dev-container:latest
+        container_name: poc-dev-container
+        hostname: poc-dev-container
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: sleep infinity
+        networks:
+            - default
+
+    postgres:
+        image: postgres:${POSTGRES_VERSION}
+        container_name: poc-dev-postgres
+        hostname: poc-dev-postgres
+        restart: unless-stopped
+        environment:
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
+        networks:
+            - default
+        ports:
+            - 5432:5432
+
+    pgadmin:
+        depends_on:
+            - postgres
+        image: elestio/pgadmin:${PGADMIN_VERSION}
+        container_name: poc-dev-pgadmin
+        hostname: poc-dev-pgadmin
+        restart: unless-stopped
+        environment:
+            - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+            - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+            - PGADMIN_LISTEN_PORT=8080
+        networks:
+            - default
+        ports:
+            - 5433:8080
+
+    mariadb:
+        image: mariadb:${MARIADB_VERSION}
+        container_name: poc-dev-mariadb
+        hostname: poc-dev-mariadb
+        restart: unless-stopped
+        # volumes:
+        #     - ./data/database:/var/lib/mysql:Z
+        environment:
+            - TZ=Asia/Bangkok
+            - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+            - MARIADB_USER=${MARIADB_USER}
+            - MARIADB_PASSWORD=${MARIADB_PASSWORD}
+            - MARIADB_DATABASE=${MARIADB_DATABASE}
+        networks:
+            - default
+        ports:
+            - 3306:3306
+
+    phpmyadmin:
+        depends_on:
+            - mariadb
+        image: phpmyadmin:${PHPMYADMIN_VERSION}
+        container_name: poc-dev-phpmyadmin
+        hostname: poc-dev-phpmyadmin
+        restart: unless-stopped
+        environment:
+            - TZ=Asia/Bangkok
+            - MEMORY_LIMIT=512M
+            - UPLOAD_LIMIT=128M
+            - MAX_EXECUTION_TIME=1000
+            - PMA_ARBITRARY=0
+            - PMA_VERBOSES=Database
+            - PMA_HOSTS=mariadb
+            - PMA_PORTS=3306
+            # - PMA_USER=${MARIADB_USER}
+            # - PMA_PASSWORD=${MARIADB_PASSWORD}
+        networks:
+            - default
+        ports:
+            - 3307:80

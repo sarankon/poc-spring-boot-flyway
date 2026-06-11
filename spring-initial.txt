@@ -1,0 +1,1 @@
+https://start.spring.io/#!type=maven-project&language=java&platformVersion=4.1.0&packaging=jar&configurationFileFormat=properties&jvmVersion=25&groupId=poc.database&artifactId=flyway&packageName=poc.database.flyway&dependencies=devtools,lombok,configuration-processor,web,data-jpa,mysql,postgresql,oracle,actuator,flyway
